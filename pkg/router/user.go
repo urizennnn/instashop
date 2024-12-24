@@ -1,11 +1,11 @@
 package router
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/urizennnn/instashop/pkg/controllers/user"
 	"github.com/urizennnn/instashop/pkg/repository/storage"
 	"github.com/urizennnn/instashop/utility"
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 func User(r *gin.Engine, ApiVersion string, validator *validator.Validate, db *storage.Database, logger *utility.Logger) *gin.Engine {

@@ -123,3 +123,4 @@ func (C *Controller) UpdateUser(ctx *gin.Context) {
 
 	ctx.JSON(status, resp)
 }
+

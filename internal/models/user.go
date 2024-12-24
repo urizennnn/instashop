@@ -34,6 +34,11 @@ type VerifyOTP struct {
 	OTP   string `json:"otp" validate:"required"`
 	Email string `json:"email" validate:"required"`
 }
+
+type LoginRequest struct {
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
 type SendOTP struct {
 	OTP   int
 	Email string
@@ -81,4 +86,12 @@ func (u *User) VerifyUser(db *gorm.DB, email string) error {
 		return err
 	}
 	return nil
+}
+func (u *User) LoginUser(db *gorm.DB, email string) (User, error) {
+	var user User
+	err := db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return user, err
+	}
+	return user, nil
 }
