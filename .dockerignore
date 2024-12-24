@@ -1,0 +1,42 @@
+# flyctl launch added from .gitignore
+# Ignore node_modules
+**/node_modules
+
+# Ignore logs
+**/logs
+**/*.log
+**/*.rdb
+
+# Ignore OS generated files
+**/.DS_Store
+**/Thumbs.db
+
+# Ignore environment variables
+**/app.env
+**/.env
+
+# Ignore build directories
+**/dist
+**/build
+
+# Ignore dependency directories
+**/vendor
+
+# Ignore IDE specific files
+**/.vscode
+**/.idea
+
+# Ignore compiled files
+**/*.out
+**/*.class
+**/*.o
+
+# Ignore temporary files
+**/*.tmp
+**/*.swp
+**/*~
+**/tmp
+
+#Ignore binary
+**/main
+fly.toml

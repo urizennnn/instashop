@@ -1,0 +1,92 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Create app.env file
+        run: |
+          echo "# Server" >> app.env
+          echo SERVER_PORT=${{ secrets.SERVER_PORT }} >> app.env
+          echo SERVER_SECRET=${{ secrets.SERVER_SECRET }} >> app.env
+          echo SERVER_ACCESSTOKENEXPIREDURATION=${{ secrets.SERVER_ACCESSTOKENEXPIREDURATION }} >> app.env
+          echo REQUEST_PER_SECOND=${{ secrets.REQUEST_PER_SECOND }} >> app.env
+          echo TRUSTED_PROXIES=${{ secrets.TRUSTED_PROXIES }} >> app.env
+          echo EXEMPT_FROM_THROTTLE=${{ secrets.EXEMPT_FROM_THROTTLE }} >> app.env
+
+          echo "# App" >> app.env
+          echo APP_NAME=${{ secrets.APP_NAME }} >> app.env
+          echo APP_URL=${{ secrets.APP_URL }} >> app.env
+          echo RESET_PASSWORD_DURATION=${{ secrets.RESET_PASSWORD_DURATION }} >> app.env
+          echo RELEASE=${{ secrets.RELEASE }} >> app.env
+
+          echo "# Databases" >> app.env
+          echo DB_HOST=${{ secrets.DB_HOST }} >> app.env
+          echo DB_PORT=${{ secrets.DB_PORT }} >> app.env
+          echo DB_CONNECTION=${{ secrets.DB_CONNECTION }} >> app.env
+          echo TIMEZONE=${{ secrets.TIMEZONE }} >> app.env
+          echo SSLMODE=${{ secrets.SSLMODE }} >> app.env
+          echo USERNAME=${{ secrets.DB_USERNAME }} >> app.env
+          echo PASSWORD=${{ secrets.DB_PASSWORD }} >> app.env
+          echo DB_NAME=${{ secrets.DB_NAME }} >> app.env
+          echo MIGRATE=${{ secrets.MIGRATE }} >> app.env
+
+          echo "# Redis" >> app.env
+          echo REDIS_HOST=${{ secrets.REDIS_HOST }} >> app.env
+          echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> app.env
+          echo REDIS_DB=${{ secrets.REDIS_DB }} >> app.env
+
+          echo "# Test" >> app.env
+          echo TEST_DB_HOST=${{ secrets.TEST_DB_HOST }} >> app.env
+          echo TEST_DB_PORT=${{ secrets.TEST_DB_PORT }} >> app.env
+          echo TEST_DB_CONNECTION=${{ secrets.TEST_DB_CONNECTION }} >> app.env
+          echo TEST_TIMEZONE=${{ secrets.TEST_TIMEZONE }} >> app.env
+          echo TEST_SSLMODE=${{ secrets.TEST_SSLMODE }} >> app.env
+          echo TEST_USERNAME=${{ secrets.TEST_USERNAME }} >> app.env
+          echo TEST_PASSWORD=${{ secrets.TEST_PASSWORD }} >> app.env
+          echo TEST_DB_NAME=${{ secrets.TEST_DB_NAME }} >> app.env
+          echo TEST_MIGRATE=${{ secrets.TEST_MIGRATE }} >> app.env
+
+          echo "# Mail" >> app.env
+          echo MAIL_HOST=${{ secrets.MAIL_HOST }} >> app.env
+          echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> app.env
+          echo MAIL_SENDER=${{ secrets.MAIL_SENDER }} >> app.env
+          echo MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} >> app.env
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Build Docker images
+        run: |
+          docker compose build study_sync
+      - name: List images
+        run: docker images
+
+      - name: Tag and push Docker images
+        run: |
+          docker tag study-sync-backend-study_sync:latest ${{ secrets.DOCKER_HUB_USERNAME }}/study-sync-backend-study_sync:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/study-sync-backend-study_sync 
+
+      - name: Clean up
+        run: docker-compose down
+

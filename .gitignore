@@ -1,0 +1,50 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore logs
+logs/
+*.log
+__pycache__/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore environment variables
+app.env
+local.env
+.env
+
+# Ignore build directories
+dist/
+build/
+/target
+
+# Ignore dependency directories
+vendor/
+
+# Ignore IDE specific files
+.vscode/
+.idea/
+
+# Ignore compiled files
+*.out
+*.class
+*.o
+
+#dump files
+*.dump
+*.rdb
+
+# Ignore temporary files
+*.tmp
+*.swp
+*~
+
+# Ignore Sessions
+*.session
+*.jpg
+
+# Ignore venv
+myenv/
+venv/

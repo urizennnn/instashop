@@ -1,0 +1,11 @@
+[build]
+  cmd="go build -o main main.go"
+  bin="main"
+  dir="."
+  include_ext=["go"]
+  exclude_dir=["vendor","logs","tmp"]
+  run_after_build= "chmod +x main"
+
+[log]
+  level="debug"
+
