@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	// "github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/urizennnn/instashop/internal/config"
 	"github.com/urizennnn/instashop/internal/models/migrations"
@@ -17,6 +18,8 @@ import (
 )
 
 func main() {
+	// gin.SetMode(gin.ReleaseMode)
+
 	logger := utility.NewLogger()
 	if logger == nil {
 		log.Fatal("Error creating logger")

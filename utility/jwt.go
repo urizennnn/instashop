@@ -1,6 +1,8 @@
 package utility
 
 import (
+	"errors"
+
 	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
 )
@@ -20,16 +22,23 @@ func GenerateToken(db *gorm.DB, userId, secret string) (string, error) {
 
 }
 func CheckToken(tokenString, secret string) (string, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	// Parse and validate the token
+	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// Ensure the signing method is correct
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
 		return []byte(secret), nil
 	})
 	if err != nil {
 		return "", err
 	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", err
-	}
-	return claims["user_id"].(string), nil
 
+	// Extract claims and verify
+	claims, ok := token.Claims.(*UserClaims)
+	if !ok || !token.Valid {
+		return "", errors.New("invalid token")
+	}
+
+	return claims.UserId, nil
 }

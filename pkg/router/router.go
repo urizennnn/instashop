@@ -3,7 +3,6 @@ package router
 import (
 	"net/http"
 
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/urizennnn/instashop/internal/config"
@@ -21,13 +20,10 @@ func Setup(logger *utility.Logger, validator *validator.Validate, db *storage.Da
 	// Middlewares
 	/* r.Use(gin.Logger())
 	r.ForwardedByClientIP = true */
-	r.SetTrustedProxies(config.GetConfig().Server.TrustedProxies)
 	r.Use(middleware.Security())
 	r.Use(middleware.Logger())
 	r.Use(gin.Recovery())
 	r.Use(middleware.CORS())
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
-	r.MaxMultipartMemory = 1 << 20 // 1MB
 
 	// routers
 	ApiVersion := "api/v1"

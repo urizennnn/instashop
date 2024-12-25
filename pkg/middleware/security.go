@@ -1,51 +1,8 @@
 package middleware
 
 import (
-	"time"
-
-	"github.com/urizennnn/instashop/internal/config"
-	"github.com/urizennnn/instashop/utility"
-	"github.com/didip/tollbooth"
-	"github.com/didip/tollbooth/limiter"
 	"github.com/gin-gonic/gin"
 )
-
-func Throttle() gin.HandlerFunc {
-	var (
-		requestPerSecond float64 = 7
-		serverConfig             = config.GetConfig().Server
-	)
-
-	if serverConfig.RequestPerSecond != 0 {
-		requestPerSecond = serverConfig.RequestPerSecond
-	}
-
-	lmt := tollbooth.NewLimiter(requestPerSecond, &limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour})
-	lmt.SetIPLookups([]string{"X-Forwarded-For", "X-Real-IP", "RemoteAddr"})
-	lmt.SetMethods([]string{"GET", "POST", "PUT", "DELETE"})
-
-	return func(c *gin.Context) {
-		if isExemptIP(c.ClientIP(), serverConfig.ExemptFromThrottle) {
-			c.Next()
-		} else {
-			httpError := tollbooth.LimitByRequest(lmt, c.Writer, c.Request)
-			if httpError != nil {
-				c.AbortWithStatusJSON(httpError.StatusCode, utility.BuildErrorResponse(httpError.StatusCode, "error", lmt.GetMessage(), httpError.Message, nil))
-			} else {
-				c.Next()
-			}
-		}
-	}
-}
-
-func isExemptIP(ip string, exemptIPs []string) bool {
-	for _, exemptIP := range exemptIPs {
-		if ip == exemptIP {
-			return true
-		}
-	}
-	return false
-}
 
 // Security middleware
 func Security() gin.HandlerFunc {

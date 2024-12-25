@@ -14,7 +14,7 @@ func CORS() gin.HandlerFunc {
 	origin := "http://localhost*"
 
 	allowList := map[string]bool{
-		"http://localhost:3000":    true,
+		"http://localhost*":    true,
 	}
 
 	return func(c *gin.Context) {

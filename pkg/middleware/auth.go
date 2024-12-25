@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/urizennnn/instashop/internal/config"
@@ -14,29 +15,33 @@ func ValidateToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.Request.Header.Get("Authorization")
 
-		if token == "" {
+		println(token)
+		if !strings.HasPrefix(token, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			c.Abort()
 			return
 		}
 
-		if token != "Bearer token" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		tokenParts := strings.Split(token, " ")
+		if len(tokenParts) != 2 {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
 			c.Abort()
 			return
 		}
-		user_id, err := utility.CheckToken(token, config.Config.Server.Secret)
+		actualToken := tokenParts[1]
+
+		userID, err := utility.CheckToken(actualToken, config.Config.Server.Secret)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Expired or invalid token"})
 			c.Abort()
 			return
 		}
-		c.Set("user_id", user_id)
+
+		c.Set("user_id", userID)
 
 		c.Next()
 	}
 }
-
 func IsAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
