@@ -14,6 +14,7 @@ type Order struct {
 	Quantity    int            `gorm:"column:quantity; type:int" json:"quantity"`
 	TotalAmount int            `gorm:"column:total_amount; type:int" json:"total_amount"`
 	User        User           `gorm:"foreignKey:UserID" json:"user"`
+	Status      string         `gorm:"column:status; type:varchar(255); not null" json:"status"`
 	Product     Product        `gorm:"foreignKey:ProductID" json:"product"`
 	CreatedAt   time.Time      `gorm:"column:created_at; not null; autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at; null; autoUpdateTime" json:"updated_at"`
@@ -27,8 +28,8 @@ type CreateOrderRequest struct {
 }
 
 type UpdateOrderRequest struct {
-	UserID   string `json:"user_id" validate:"required"`
-	Quantity int    `json:"quantity" validate:"required"`
+	OrderID string `json:"order_id" validate:"required"`
+	Status  string `json:"status" validate:"required"`
 }
 
 func (o *Order) CreateOrder(db *gorm.DB) error {

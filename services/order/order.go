@@ -2,6 +2,7 @@ package order
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -48,12 +49,17 @@ func CreateOrder(req *models.CreateOrderRequest, db *gorm.DB, logger *utility.Lo
 
 func UpdateOrder(req *models.UpdateOrderRequest, db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {
 	var order models.Order
-	err := db.Where("user_id = ?", ctx.GetString("user_id")).First(&order).Error
+	err := db.Where("id = ?", req.OrderID).First(&order).Error
 	if err != nil {
 		logger.Error(err)
 		return nil, http.StatusBadRequest, err
 	}
-	order.Quantity = req.Quantity
+	lower_status := strings.ToLower(req.Status)
+	if lower_status != "pending" {
+		logger.Error("Cannot update order status")
+		return nil, http.StatusBadRequest, err
+	}
+	order.Status = req.Status
 	order.UpdatedAt = time.Now()
 	err = db.Save(&order).Error
 	if err != nil {
@@ -68,9 +74,9 @@ func UpdateOrder(req *models.UpdateOrderRequest, db *gorm.DB, logger *utility.Lo
 	return respData, http.StatusOK, nil
 }
 
-func DeleteOrder(db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {
+func DeleteOrder(id string, db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {
 	var order models.Order
-	err := db.Where("user_id = ?", ctx.GetString("user_id")).First(&order).Error
+	err := db.Where("id = ?", id).First(&order).Error
 	if err != nil {
 		logger.Error(err)
 		return nil, http.StatusBadRequest, err
@@ -88,9 +94,9 @@ func DeleteOrder(db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, 
 	return respData, http.StatusOK, nil
 }
 
-func GetOrder(db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {
+func GetOrderByID(id string, db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {
 	var order models.Order
-	err := db.Where("user_id = ?", ctx.GetString("user_id")).First(&order).Error
+	err := db.Where("id = ?", id).First(&order).Error
 	if err != nil {
 		logger.Error(err)
 		return nil, http.StatusBadRequest, err
@@ -102,11 +108,12 @@ func GetOrder(db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int
 		"status":  http.StatusOK,
 	}
 	return respData, http.StatusOK, nil
+
 }
 
 func GetOrders(db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {
 	var orders []models.Order
-	err := db.Find(&orders).Error
+	err := db.Where("user_id = ?", ctx.GetString("user_id")).Find(&orders).Error
 	if err != nil {
 		logger.Error(err)
 		return nil, http.StatusBadRequest, err

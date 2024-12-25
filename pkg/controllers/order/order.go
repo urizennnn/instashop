@@ -54,7 +54,8 @@ func (c *Controller) GetOrders(ctx *gin.Context) {
 }
 
 func (c *Controller) GetOrder(ctx *gin.Context) {
-	resp, status, err := service.GetOrder(c.Db.Postgresql, c.Logger, ctx)
+	var order_id = ctx.Param("id")
+	resp, status, err := service.GetOrderByID(order_id, c.Db.Postgresql, c.Logger, ctx)
 	if err != nil {
 		rd := utility.BuildErrorResponse(status, "error", "Failed to get order", err.Error(), nil)
 		ctx.JSON(status, rd)
@@ -91,7 +92,8 @@ func (c *Controller) UpdateOrder(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteOrder(ctx *gin.Context) {
-	resp, status, err := service.DeleteOrder(c.Db.Postgresql, c.Logger, ctx)
+	var order_id = ctx.Param("id")
+	resp, status, err := service.DeleteOrder(order_id, c.Db.Postgresql, c.Logger, ctx)
 	if err != nil {
 		rd := utility.BuildErrorResponse(status, "error", "Failed to delete order", err.Error(), nil)
 		ctx.JSON(status, rd)
