@@ -1,5 +1,5 @@
 services:
-  study_sync:
+  instashop:
     build:
       context: .
       dockerfile: Dockerfile

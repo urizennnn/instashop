@@ -19,4 +19,17 @@ func GenerateToken(db *gorm.DB, userId, secret string) (string, error) {
 	return token.SignedString([]byte(secret))
 
 }
-func CheckToken() {}
+func CheckToken(tokenString, secret string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", err
+	}
+	return claims["user_id"].(string), nil
+
+}

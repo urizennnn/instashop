@@ -33,10 +33,12 @@ func Setup(logger *utility.Logger, validator *validator.Validate, db *storage.Da
 	ApiVersion := "api/v1"
 	User(r, ApiVersion, validator, db, logger)
 	Auth(r, ApiVersion, validator, db, logger)
+	Product(r, ApiVersion, validator, db, logger)
+
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
-			"message": "Welcome to Study Sync Backend",
+			"message": "Welcome to Instashop API",
 			"status":  "success",
 		})
 	})

@@ -1,24 +1,23 @@
-package products
+package order
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/urizennnn/instashop/internal/models"
 	"github.com/urizennnn/instashop/pkg/repository/storage"
-	service "github.com/urizennnn/instashop/services/products"
+	service "github.com/urizennnn/instashop/services/order"
 	"github.com/urizennnn/instashop/utility"
+	"net/http"
 )
 
 type Controller struct {
 	Db        *storage.Database
-	Validator *validator.Validate
 	Logger    *utility.Logger
+	Validator *validator.Validate
 }
 
-func (c *Controller) CreateProduct(ctx *gin.Context) {
-	req := models.CreateProductRequest{}
+func (c *Controller) CreateOrder(ctx *gin.Context) {
+	req := models.CreateOrderRequest{}
 	err := ctx.ShouldBind(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "Failed to parse request body", err, nil)
@@ -33,21 +32,9 @@ func (c *Controller) CreateProduct(ctx *gin.Context) {
 		return
 	}
 
-	resp, status, err := service.CreateProduct(&req, c.Db.Postgresql, c.Logger, ctx)
+	resp, status, err := service.CreateOrder(&req, c.Db.Postgresql, c.Logger, ctx)
 	if err != nil {
-		rd := utility.BuildErrorResponse(status, "error", "Failed to create product", err.Error(), nil)
-		ctx.JSON(status, rd)
-		return
-	}
-
-	ctx.JSON(status, resp)
-
-}
-
-func (c *Controller) GetProducts(ctx *gin.Context) {
-	resp, status, err := service.GetProducts(c.Db.Postgresql, c.Logger, ctx)
-	if err != nil {
-		rd := utility.BuildErrorResponse(status, "error", "Failed to get products", err.Error(), nil)
+		rd := utility.BuildErrorResponse(status, "error", "Failed to create order", err.Error(), nil)
 		ctx.JSON(status, rd)
 		return
 	}
@@ -55,10 +42,10 @@ func (c *Controller) GetProducts(ctx *gin.Context) {
 	ctx.JSON(status, resp)
 }
 
-func (c *Controller) GetProduct(ctx *gin.Context) {
-	resp, status, err := service.GetProduct(c.Db.Postgresql, c.Logger, ctx)
+func (c *Controller) GetOrders(ctx *gin.Context) {
+	resp, status, err := service.GetOrders(c.Db.Postgresql, c.Logger, ctx)
 	if err != nil {
-		rd := utility.BuildErrorResponse(status, "error", "Failed to get product", err.Error(), nil)
+		rd := utility.BuildErrorResponse(status, "error", "Failed to get orders", err.Error(), nil)
 		ctx.JSON(status, rd)
 		return
 	}
@@ -66,8 +53,19 @@ func (c *Controller) GetProduct(ctx *gin.Context) {
 	ctx.JSON(status, resp)
 }
 
-func (c *Controller) UpdateProduct(ctx *gin.Context) {
-	req := models.UpdateProductRequest{}
+func (c *Controller) GetOrder(ctx *gin.Context) {
+	resp, status, err := service.GetOrder(c.Db.Postgresql, c.Logger, ctx)
+	if err != nil {
+		rd := utility.BuildErrorResponse(status, "error", "Failed to get order", err.Error(), nil)
+		ctx.JSON(status, rd)
+		return
+	}
+
+	ctx.JSON(status, resp)
+}
+
+func (c *Controller) UpdateOrder(ctx *gin.Context) {
+	req := models.UpdateOrderRequest{}
 	err := ctx.ShouldBind(&req)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "Failed to parse request body", err, nil)
@@ -82,9 +80,9 @@ func (c *Controller) UpdateProduct(ctx *gin.Context) {
 		return
 	}
 
-	resp, status, err := service.UpdateProduct(&req, c.Db.Postgresql, c.Logger, ctx)
+	resp, status, err := service.UpdateOrder(&req, c.Db.Postgresql, c.Logger, ctx)
 	if err != nil {
-		rd := utility.BuildErrorResponse(status, "error", "Failed to update product", err.Error(), nil)
+		rd := utility.BuildErrorResponse(status, "error", "Failed to update order", err.Error(), nil)
 		ctx.JSON(status, rd)
 		return
 	}
@@ -92,10 +90,10 @@ func (c *Controller) UpdateProduct(ctx *gin.Context) {
 	ctx.JSON(status, resp)
 }
 
-func (c *Controller) DeleteProduct(ctx *gin.Context) {
-	resp, status, err := service.DeleteProduct(c.Db.Postgresql, c.Logger, ctx)
+func (c *Controller) DeleteOrder(ctx *gin.Context) {
+	resp, status, err := service.DeleteOrder(c.Db.Postgresql, c.Logger, ctx)
 	if err != nil {
-		rd := utility.BuildErrorResponse(status, "error", "Failed to delete product", err.Error(), nil)
+		rd := utility.BuildErrorResponse(status, "error", "Failed to delete order", err.Error(), nil)
 		ctx.JSON(status, rd)
 		return
 	}

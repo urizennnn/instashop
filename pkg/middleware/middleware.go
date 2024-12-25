@@ -14,8 +14,6 @@ func CORS() gin.HandlerFunc {
 	origin := "http://localhost*"
 
 	allowList := map[string]bool{
-		"https://staging.telex.im": true,
-		"https://telex.im":         true,
 		"http://localhost:3000":    true,
 	}
 

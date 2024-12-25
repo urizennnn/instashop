@@ -9,12 +9,12 @@ import (
 
 type Order struct {
 	ID          string         `gorm:"type:uuid;primaryKey;unique;not null" json:"id"`
-	UserID      string         `gorm:"column:user_id; type:uuid; not null" json:"user_id"` // Foreign key for User
+	UserID      string         `gorm:"column:user_id; type:uuid; not null" json:"user_id"`
 	ProductID   string         `gorm:"column:product_id; type:uuid; not null" json:"product_id"`
 	Quantity    int            `gorm:"column:quantity; type:int" json:"quantity"`
 	TotalAmount int            `gorm:"column:total_amount; type:int" json:"total_amount"`
-	User        User           `gorm:"foreignKey:UserID" json:"user"`       // Correct relationship
-	Product     Product        `gorm:"foreignKey:ProductID" json:"product"` // Add Product relationship
+	User        User           `gorm:"foreignKey:UserID" json:"user"`
+	Product     Product        `gorm:"foreignKey:ProductID" json:"product"`
 	CreatedAt   time.Time      `gorm:"column:created_at; not null; autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at; null; autoUpdateTime" json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
@@ -24,6 +24,11 @@ type CreateOrderRequest struct {
 	UserID    string `json:"user_id" validate:"required"`
 	ProductID string `json:"product_id" validate:"required"`
 	Quantity  int    `json:"quantity" validate:"required"`
+}
+
+type UpdateOrderRequest struct {
+	UserID   string `json:"user_id" validate:"required"`
+	Quantity int    `json:"quantity" validate:"required"`
 }
 
 func (o *Order) CreateOrder(db *gorm.DB) error {

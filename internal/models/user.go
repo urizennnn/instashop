@@ -95,3 +95,11 @@ func (u *User) LoginUser(db *gorm.DB, email string) (User, error) {
 	}
 	return user, nil
 }
+func (u *User) GetUser(db *gorm.DB, email string) (User, error) {
+	var user User
+	err := db.Where("id = ?", email).First(&user).Error
+	if err != nil {
+		return user, err
+	}
+	return user, nil
+}
