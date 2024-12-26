@@ -1,6 +1,7 @@
 package order
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -12,40 +13,58 @@ import (
 )
 
 func CreateOrder(req *models.CreateOrderRequest, db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {
-	var user models.User
 	var produdct models.Product
 
-	user, err := user.LoginUser(db, ctx.GetString("user_id"))
+	var user models.User
+	// Fetch user ID from context
+	userID := ctx.GetString("user_id")
+	fmt.Println("User ID:", userID)
+
+	// Fetch user from database
+	user, err := user.LoginUser(db, userID)
 	if err != nil {
 		logger.Error("Could not get user", err)
-		return nil, http.StatusBadRequest, err
+		if err == gorm.ErrRecordNotFound {
+			return nil, http.StatusNotFound, fmt.Errorf("user with id %s not found", userID)
+		}
+		return nil, http.StatusInternalServerError, err
 	}
+	fmt.Println("Fetched User:", user)
+
+	// Fetch product from database
 	err = db.Where("id = ?", req.ProductID).First(&produdct).Error
 	if err != nil {
 		logger.Error("Could not get product", err)
-		return nil, http.StatusBadRequest, err
+		if err == gorm.ErrRecordNotFound {
+			return nil, http.StatusNotFound, fmt.Errorf("product with id %s not found", req.ProductID)
+		}
+		return nil, http.StatusInternalServerError, err
 	}
+
+	// Create order
 	order := models.Order{
 		ProductID:   req.ProductID,
 		ID:          utility.GenerateUUID(),
 		Quantity:    req.Quantity,
-		UserID:      ctx.GetString("user_id"),
+		UserID:      userID,
 		TotalAmount: produdct.Price * req.Quantity,
 	}
 
 	err = order.CreateOrder(db)
 	if err != nil {
-		logger.Error("Something went wrong creating your error", err)
-		return nil, http.StatusBadRequest, err
+		logger.Error("Something went wrong creating your order", err)
+		return nil, http.StatusInternalServerError, err
 	}
 
+	fmt.Println("Order Created:", order)
+
+	// Return response
 	respData := gin.H{
 		"message": "Order created successfully",
 		"order":   order,
 		"status":  http.StatusOK,
 	}
 	return respData, http.StatusCreated, nil
-
 }
 
 func UpdateOrder(req *models.UpdateOrderRequest, db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {

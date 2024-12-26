@@ -3,6 +3,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    develop:
+      watch:
+        - path: .
+          target: /app
+          action: sync
+        - path: go.mod
+          target: /app/go.mod
+          action: rebuild
+        - path: go.sum
+          target: /app/go.sum
+          action: rebuild
     ports:
       - "8019:8019"
     depends_on:
