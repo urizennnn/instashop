@@ -7,15 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/urizennnn/instashop/internal/config"
 	"github.com/urizennnn/instashop/internal/models"
-	"github.com/urizennnn/instashop/pkg/repository/storage"
 	"github.com/urizennnn/instashop/utility"
+	"gorm.io/gorm"
 )
 
 func ValidateToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.Request.Header.Get("Authorization")
 
-		println(token)
 		if !strings.HasPrefix(token, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			c.Abort()
@@ -42,25 +41,26 @@ func ValidateToken() gin.HandlerFunc {
 		c.Next()
 	}
 }
-func IsAdmin() gin.HandlerFunc {
+func IsAdmin(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
 		var role models.Role
 
-		user, err := user.GetUser(*&storage.DB.Postgresql, c.GetString("user_id"))
+		user, err := user.GetUser(db, c.GetString("user_id"))
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unable to find user"})
 			c.Abort()
 			return
 		}
-		err = role.FindRoleById(*&storage.DB.Postgresql, user.RoleID)
+		err = role.FindRoleById(db, user.RoleID)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unable to find role"})
 			c.Abort()
 			return
 		}
-		if role.Name != "administator" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		println(role.Name)
+		if role.Name != "administrator" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized access"})
 			c.Abort()
 			return
 		}

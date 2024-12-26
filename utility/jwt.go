@@ -2,9 +2,9 @@ package utility
 
 import (
 	"errors"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"gorm.io/gorm"
 )
 
 type UserClaims struct {
@@ -12,19 +12,25 @@ type UserClaims struct {
 	jwt.StandardClaims
 }
 
-func GenerateToken(db *gorm.DB, userId, secret string) (string, error) {
+func GenerateToken(userId, secret string, expirationTime time.Duration) (string, error) {
 	claims := UserClaims{
-		UserId:         userId,
-		StandardClaims: jwt.StandardClaims{},
+		UserId: userId,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(expirationTime).Unix(),
+		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secret))
 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", err
+	}
+
+	return signedToken, nil
 }
+
 func CheckToken(tokenString, secret string) (string, error) {
-	// Parse and validate the token
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		// Ensure the signing method is correct
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
@@ -34,10 +40,9 @@ func CheckToken(tokenString, secret string) (string, error) {
 		return "", err
 	}
 
-	// Extract claims and verify
 	claims, ok := token.Claims.(*UserClaims)
 	if !ok || !token.Valid {
-		return "", errors.New("invalid token")
+		return "", errors.New("invalid or expired token")
 	}
 
 	return claims.UserId, nil

@@ -14,7 +14,6 @@ type User struct {
 	Email      string         `gorm:"column:email;unique;not null; type:varchar(255)" json:"email"`
 	IsVerified bool           `gorm:"column:is_verified; type:bool" json:"is_verified"`
 	RoleID     string         `gorm:"type:uuid;not null" json:"role_id"`
-	Role       Role           `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE;" json:"role"`
 	Product    []Product      `gorm:"foreignKey:UserID" json:"product"`
 	Order      []Order        `gorm:"foreignKey:UserID" json:"order"`
 	Password   string         `gorm:"column:password; type:text; not null" json:"-"`

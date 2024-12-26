@@ -11,12 +11,12 @@ import (
 
 func Product(r *gin.Engine, ApiVersion string, validator *validator.Validate, db *storage.Database, logger *utility.Logger) {
 	productController := products.Controller{Db: db, Validator: validator, Logger: logger}
-	productUrl := r.Group(ApiVersion+"/product", middleware.ValidateToken(), middleware.IsAdmin())
+	productUrl := r.Group(ApiVersion+"/product", middleware.ValidateToken())
 	{
 		productUrl.POST("/create", productController.CreateProduct)
 		productUrl.GET("/get", productController.GetProducts)
 		productUrl.GET("/get/:id", productController.GetProduct)
-		productUrl.PATCH("/update/:id", productController.UpdateProduct)
+		productUrl.PATCH("/update/:id", middleware.IsAdmin(db.Postgresql), productController.UpdateProduct)
 		productUrl.DELETE("/delete/:id", productController.DeleteProduct)
 	}
 

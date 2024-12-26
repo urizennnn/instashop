@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/urizennnn/instashop/internal/config"
@@ -30,7 +31,7 @@ func LoginUser(req *models.LoginRequest, db *gorm.DB, logger *utility.Logger, ct
 		return nil, http.StatusUnauthorized, errors.New("user not verified")
 	}
 
-	token, err := utility.GenerateToken(db, user.ID, config.Config.Server.Secret)
+	token, err := utility.GenerateToken(user.ID, config.Config.Server.Secret, time.Hour*5)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}

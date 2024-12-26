@@ -11,7 +11,7 @@ import (
 
 func Order(r *gin.Engine, ApiVersion string, validator *validator.Validate, db *storage.Database, logger *utility.Logger) {
 	orderController := order.Controller{Db: db, Validator: validator, Logger: logger}
-	orderUrl := r.Group(ApiVersion+"/order", middleware.ValidateToken(), middleware.IsAdmin())
+	orderUrl := r.Group(ApiVersion+"/order", middleware.ValidateToken(), middleware.IsAdmin(db.Postgresql))
 	{
 		orderUrl.POST("/create", orderController.CreateOrder)
 		orderUrl.GET("/get", orderController.GetOrders)

@@ -10,15 +10,23 @@ import (
 )
 
 func CreateProduct(req *models.CreateProductRequest, db *gorm.DB, logger *utility.Logger, ctx *gin.Context) (gin.H, int, error) {
+	var user models.User
+	err := db.Where("id = ?", ctx.GetString("user_id")).First(&user).Error
+	if err != nil {
+		logger.Error("Failed to get user", err)
+		return nil, http.StatusInternalServerError, err
+	}
 	product := models.Product{
+		ID:          utility.GenerateUUID(),
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
 		Quantity:    req.Quantity,
 		UserID:      ctx.GetString("user_id"),
+		User:        user,
 	}
 
-	err := db.Create(&product).Error
+	err = db.Create(&product).Error
 	if err != nil {
 		logger.Error("Failed to create product", err)
 		return nil, http.StatusInternalServerError, err

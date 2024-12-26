@@ -40,7 +40,6 @@ func CreateUser(req *models.CreateUserRequest, db *gorm.DB, logger *utility.Logg
 		ID:         uuid.Must(uuid.NewV4()).String(),
 		Email:      email,
 		FirstName:  firstName,
-		Role:       Role,
 		LastName:   lastName,
 		Password:   password,
 		IsVerified: false,

@@ -17,16 +17,17 @@ func CreateOrder(req *models.CreateOrderRequest, db *gorm.DB, logger *utility.Lo
 
 	user, err := user.LoginUser(db, ctx.GetString("user_id"))
 	if err != nil {
-		logger.Error(err)
+		logger.Error("Could not get user", err)
 		return nil, http.StatusBadRequest, err
 	}
 	err = db.Where("id = ?", req.ProductID).First(&produdct).Error
 	if err != nil {
-		logger.Error(err)
+		logger.Error("Could not get product", err)
 		return nil, http.StatusBadRequest, err
 	}
 	order := models.Order{
 		ProductID:   req.ProductID,
+		ID:          utility.GenerateUUID(),
 		Quantity:    req.Quantity,
 		UserID:      ctx.GetString("user_id"),
 		TotalAmount: produdct.Price * req.Quantity,
@@ -34,7 +35,7 @@ func CreateOrder(req *models.CreateOrderRequest, db *gorm.DB, logger *utility.Lo
 
 	err = order.CreateOrder(db)
 	if err != nil {
-		logger.Error(err)
+		logger.Error("Something went wrong creating your error", err)
 		return nil, http.StatusBadRequest, err
 	}
 
