@@ -3,6 +3,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2g
+    #     reservations:
+          # memory: 1g
     develop:
       watch:
         - path: .

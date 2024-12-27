@@ -21,15 +21,13 @@ func CreateOrder(req *models.CreateOrderRequest, db *gorm.DB, logger *utility.Lo
 	fmt.Println("User ID:", userID)
 
 	// Fetch user from database
-	user, err := user.LoginUser(db, userID)
+	err := db.Where("id = ?", userID).First(&user).Error
 	if err != nil {
 		logger.Error("Could not get user", err)
 		if err == gorm.ErrRecordNotFound {
 			return nil, http.StatusNotFound, fmt.Errorf("user with id %s not found", userID)
 		}
-		return nil, http.StatusInternalServerError, err
 	}
-	fmt.Println("Fetched User:", user)
 
 	// Fetch product from database
 	err = db.Where("id = ?", req.ProductID).First(&produdct).Error
@@ -48,6 +46,9 @@ func CreateOrder(req *models.CreateOrderRequest, db *gorm.DB, logger *utility.Lo
 		Quantity:    req.Quantity,
 		UserID:      userID,
 		TotalAmount: produdct.Price * req.Quantity,
+		User:        user,
+		Product:     produdct,
+		Status:      "pending",
 	}
 
 	err = order.CreateOrder(db)

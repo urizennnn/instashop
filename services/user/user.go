@@ -30,10 +30,12 @@ func CreateUser(req *models.CreateUserRequest, db *gorm.DB, logger *utility.Logg
 	)
 	err := Role.FindRoleById(db, role)
 	if err != nil {
+		logger.Error("Error finding role: %v", err)
 		return nil, http.StatusBadRequest, err
 	}
 	password, err = utility.HashPassword(password)
 	if err != nil {
+		logger.Error("Error hashing password: %v", err)
 		return nil, http.StatusBadRequest, err
 	}
 	user = models.User{
@@ -41,11 +43,13 @@ func CreateUser(req *models.CreateUserRequest, db *gorm.DB, logger *utility.Logg
 		Email:      email,
 		FirstName:  firstName,
 		LastName:   lastName,
+		RoleID:     role,
 		Password:   password,
 		IsVerified: false,
 	}
 	otp, err := utility.GenerateOTP(6)
 	if err != nil {
+		logger.Error("Error generating OTP: %v", err)
 		return nil, http.StatusInternalServerError, err
 	}
 
@@ -56,6 +60,7 @@ func CreateUser(req *models.CreateUserRequest, db *gorm.DB, logger *utility.Logg
 
 	err = user.CreateUser(db)
 	if err != nil {
+		logger.Error("Error creating user: %v", err)
 		return nil, http.StatusBadRequest, err
 	}
 	err = SendOtp(&otpdetails, logger)
